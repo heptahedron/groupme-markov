@@ -1,4 +1,5 @@
 # vim:sw=4 ts=4
+from groupme_bot_server import GroupmeBotServer
 from groupme_bot import GroupmeBot
 import groupme_message_fetch
 import re
@@ -7,14 +8,12 @@ import random
 from sys import argv, exit
 
 class MarkovBot(GroupmeBot):
-    def __init__(self, bot_id, name):
-        super().__init__(bot_id)
-        self.name = name
+    def __init__(self, group_id, bot_id, name):
+        super().__init__(group_id, bot_id, name)
         self.members = {}
         self.member_aliases = {}
 
     def parse_history(self, filename):
-        print('Parsing group history...')
         with open(filename) as f:
             messages = json.load(f)
             for msg in messages:
@@ -39,17 +38,8 @@ class MarkovBot(GroupmeBot):
                     else: 
                         nextword = None
                     self.members[sender_id].append((word, nextword))
-        print('Done.')
 
-        
-    def msg_received(self, sender, msg):
-        res = re.match('^{}[,:!]?\s+(.*)$'.format(self.name), msg)
-        if res == None or res.group(1) == '':
-            return
-
-        self.command(res.group(1), sender)
-
-    def command(self, cmd, sender):
+    def cmd_received(self, sender, cmd):
         res = re.match('^what would (.*) say (right now|[^\?]*)\??$', cmd)
         if res:
             if res.group(2) == 'right now':
@@ -85,9 +75,13 @@ class MarkovBot(GroupmeBot):
         return ' '.join(sentence_words)
 
 if __name__ == '__main__':
-    if len(argv) < 4:
-        print('arguments: bot id, name, history file')
+    if len(argv) < 5:
+        print('arguments: group id, bot id, name, history file')
         exit(1)
-    mb = MarkovBot(argv[1], argv[2])
-    mb.parse_history(argv[3])
-    mb.listen()
+    mb = MarkovBot(argv[1], argv[2], argv[3])
+    print('Parsing group history file {}...'.format(argv[4]))
+    mb.parse_history(argv[4])
+    print('Done.')
+    print('Listening for messages...')
+    gbs = GroupmeBotServer([mb])
+    gbs.listen()
