@@ -52,6 +52,9 @@ class MarkovBot(GroupmeBot):
             elif res.group(1) in self.member_aliases:
                 subject =  res.group(1)
                 s_id = self.member_aliases[subject]
+            else:
+                self.say('Who tf is {}'.format(res.group(1)))
+                return
             
             if situation:
                 self.say('{}, {}: {}'.format(
