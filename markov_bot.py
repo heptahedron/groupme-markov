@@ -1,4 +1,4 @@
-# vim:sw=4 ts=4
+# vim:sw=4 ts=4 sts=4
 from groupme_bot_server import GroupmeBotServer
 from groupme_bot import GroupmeBot
 import groupme_message_fetch
@@ -53,8 +53,15 @@ class MarkovBot(GroupmeBot):
                 subject =  res.group(1)
                 s_id = self.member_aliases[subject]
             else:
-                self.say('Who tf is {}'.format(res.group(1)))
-                return
+                poss_senders = [alias for alias in self.member_aliases.keys() if alias.startswith(res.group(1))]
+                if len(poss_senders) == 0:
+                    self.say('Who tf is {}'.format(res.group(1)))
+                elif len(poss_senders) == 1:
+                    subject = poss_senders[0]
+                    s_id = self.member_aliases[poss_senders[0]];
+                else:
+                    self.say('There are multiple people whose names look like that: {}'.format(','.join(poss_senders)))
+                    return
             
             if situation:
                 self.say('{}, {}: {}'.format(
@@ -62,6 +69,8 @@ class MarkovBot(GroupmeBot):
             else:
                 self.say('{}: {}'.format(
                     subject, self.gen_sentence(s_id)))
+        else:
+            self.say('wat')
         
     def gen_sentence(self, sender_id):
         samp_space = self.members[sender_id]

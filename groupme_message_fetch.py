@@ -1,4 +1,4 @@
-# vim:sw=4 ts=4
+# vim:sw=4 ts=4 sts=4
 from sys import argv, exit
 import urllib.request
 import urllib.parse
@@ -13,7 +13,6 @@ class GroupmeMsgFetcher:
         self.token = token
         self.msg_queue = []
         self.total_count = 0
-        self.total_fetched = 0
         self.processed = 0
 
     def dump(self, filename):
@@ -47,7 +46,7 @@ class GroupmeMsgFetcher:
         self.total_count = res_json['response']['count']
 
     def _enqueue(self):
-        left = self.total_count - self.total_fetched
+        left = self.total_count - len(self.msg_queue)
         if left <= 0: return
         req = self._create_req({
             'limit': 100,
@@ -59,7 +58,6 @@ class GroupmeMsgFetcher:
             raise Exception('Could not fetch messages')
 
         self.msg_queue.extend(res_json['response']['messages'])
-        self.total_fetched += len(res_json['response']['messages'])
 
     def _done(self):
         return self.processed >= self.total_count
@@ -71,7 +69,7 @@ class GroupmeMsgFetcher:
     def __next__(self):
         try:
             if not self._done():
-                if self.processed >= self.total_fetched: 
+                if self.processed >= len(self.msg_queue): 
                     self._enqueue()
                 self.processed += 1
                 res = self.msg_queue[0]
@@ -85,11 +83,21 @@ class GroupmeMsgFetcher:
 
             
 if __name__ == '__main__':
-    if not len(argv) > 3:
-        print('python groupme_message_fetch.py group_id token filename')
+    iterate = False
+
+    if len(argv) < 4:
+        print('python3 groupme_message_fetch.py group_id token filename [-d]')
         exit(1)
+    elif len(argv) == 5:
+        iterate = true
 
     f = GroupmeMsgFetcher(argv[1], argv[2])
-    print('Dumping log of group {} to file {}.'.format(argv[1], argv[3]))
-    f.dump(argv[3])
+
+    if not iterate:
+        print('Dumping log of group {} to file {}.'.format(argv[1], argv[3]))
+        f.dump(argv[3])
+    else:
+        for message in f:
+            print(message)
+
     exit(0)
