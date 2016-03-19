@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Randy",
+    "type": "markov",
+    "history_file": "group_history.json",
+    "group_id": "0123456",
+    "bot_id": "1b80a263e1befaa745ef4b55c7"
+  },
+  {
+    "name": "Gretchen",
+    "type": "markov",
+    "history_file": "other_group_history.json",
+    "group_id": "001337",
+    "bot_id": "8c978f009246b1adb3d3a465da"
+  }
+]

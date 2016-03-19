@@ -86,7 +86,7 @@ if __name__ == '__main__':
     iterate = False
 
     if len(argv) < 4:
-        print('python3 groupme_message_fetch.py group_id token filename [-d]')
+        print('python3 groupme_message_fetch.py <group_id> <token> <filename> [-d]')
         exit(1)
     elif len(argv) == 5:
         iterate = true
